@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace AvatarLoger
+﻿namespace AvatarLoger
 {
     public class Config
     {
         public string PublicWebhook { get; set; }
         public string PrivateWebhook { get; set; }
-        public string BotName { get; set; }
-        public string AvatarURL { get; set; }
+        public static string BotName => null;
+        public static string AvatarURL => null;
         public bool CanPostFriendsAvatar { get; set; }
+        public static bool CanPostSelfAvatar => false;
     }
 }

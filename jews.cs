@@ -3,29 +3,28 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 using Harmony;
 using VRC.Core;
 using System.IO;
 using DSharpPlus.Entities;
-using DSharpPlus.Net;
 using DSharpPlus;
 using System.Net.Http;
 using Newtonsoft.Json;
-using System.Collections;
-using UnityEngine;
+using System.Threading;
+using MelonLoader;
 
 namespace AvatarLoger
 {
     
-    public class jews : MelonLoader.MelonMod
+    public class Jews : MelonMod
     {
-        static string PublicAvatarFile = "AvatarLog\\Public.txt";
-        static string PrivateAvatarFile = "AvatarLog\\Private.txt";
-        static string AvatarIDs = "";
-        static Queue<ApiAvatar> AvatarToPost = new Queue<ApiAvatar>();
-        static Config config { get; set; }
-        private static HarmonyMethod GetPatch(string name) => new HarmonyMethod(typeof(jews).GetMethod(name, BindingFlags.Static | BindingFlags.NonPublic));
+        private const string PublicAvatarFile = "AvatarLog\\Public.txt";
+        private const string PrivateAvatarFile = "AvatarLog\\Private.txt";
+        private static string _avatarIDs = "";
+        private static readonly Queue<ApiAvatar> AvatarToPost = new Queue<ApiAvatar>();
+        private static readonly HttpClient WebHookClient = new HttpClient();
+        private static Config Config { get; set; }
+        private static HarmonyMethod GetPatch(string name) => new HarmonyMethod(typeof(Jews).GetMethod(name, BindingFlags.Static | BindingFlags.NonPublic));
         public override void OnApplicationStart()
         {
 
@@ -37,10 +36,10 @@ namespace AvatarLoger
 
             foreach (string line in File.ReadAllLines(PublicAvatarFile)) 
                 if (line.Contains("Avatar ID"))
-                    AvatarIDs += line.Replace("Avatar ID:", "");
+                    _avatarIDs += line.Replace("Avatar ID:", "");
             foreach (string line in File.ReadAllLines(PrivateAvatarFile))
                 if (line.Contains("Avatar ID"))
-                    AvatarIDs += line.Replace("Avatar ID:", "");
+                    _avatarIDs += line.Replace("Avatar ID:", "");
 
             if (!File.Exists("AvatarLog\\Config.json"))
             {
@@ -59,22 +58,22 @@ namespace AvatarLoger
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Config File Detected!");
-                config = JsonConvert.DeserializeObject<Config>(File.ReadAllText("AvatarLog\\Config.json"));
+                Config = JsonConvert.DeserializeObject<Config>(File.ReadAllText("AvatarLog\\Config.json"));
             }
 
             
-            HarmonyInstance patchman = HarmonyInstance.Create("pog");
-            patchman.Patch(typeof(AssetBundleDownloadManager).GetMethods().Where(mi => mi.GetParameters().Length == 1 && mi.GetParameters().First().ParameterType == typeof(ApiAvatar) && mi.ReturnType == typeof(void)).FirstOrDefault(), GetPatch("apiavatardownloadthingy"));
+            HarmonyInstance patchMan = HarmonyInstance.Create("pog");
+            patchMan.Patch(typeof(AssetBundleDownloadManager).GetMethods().FirstOrDefault(mi => mi.GetParameters().Length == 1 && mi.GetParameters().First().ParameterType == typeof(ApiAvatar) && mi.ReturnType == typeof(void)), GetPatch("ApiAvatarDownloadPatch"));
 
-            MelonLoader.MelonCoroutines.Start(DoCheck());
+            new Thread(DoCheck).Start();
         }
-        private static bool apiavatardownloadthingy(ApiAvatar __0) 
+        private static bool ApiAvatarDownloadPatch(ApiAvatar __0) 
         {
-            if (!AvatarIDs.Contains(__0.id))
+            if (!_avatarIDs.Contains(__0.id))
             {
                 if (__0.releaseStatus == "public")
                 {
-                    AvatarIDs += __0.id;
+                    _avatarIDs += __0.id;
                     StringBuilder avatarlog = new StringBuilder();
                     avatarlog.AppendLine($"Avatar ID:{__0.id}");
                     avatarlog.AppendLine($"Avatar Name:{__0.name}");
@@ -88,12 +87,13 @@ namespace AvatarLoger
                     avatarlog.AppendLine($"Avatar Version:{__0.version}");
                     avatarlog.AppendLine(Environment.NewLine);
                     File.AppendAllText(PublicAvatarFile, avatarlog.ToString());
-                    if (!string.IsNullOrEmpty(config.PublicWebhook) && CanPost(__0.id))
+                    avatarlog.Clear();
+                    if (!string.IsNullOrEmpty(Config.PublicWebhook) && CanPost(__0.authorId))
                         AvatarToPost.Enqueue(__0);
                 }
                 else
                 {
-                    AvatarIDs += __0.id;
+                    _avatarIDs += __0.id;
                     StringBuilder avatarlog = new StringBuilder();
                     avatarlog.AppendLine($"Avatar ID:{__0.id}");
                     avatarlog.AppendLine($"Avatar Name:{__0.name}");
@@ -106,8 +106,9 @@ namespace AvatarLoger
                     avatarlog.AppendLine($"Avatar Release Status:{__0.releaseStatus}");
                     avatarlog.AppendLine($"Avatar Version:{__0.version}");
                     avatarlog.AppendLine(Environment.NewLine);
+                    avatarlog.Clear();
                     File.AppendAllText(PrivateAvatarFile, avatarlog.ToString());
-                    if (!string.IsNullOrEmpty(config.PrivateWebhook) && CanPost(__0.id))
+                    if (!string.IsNullOrEmpty(Config.PrivateWebhook) && CanPost(__0.authorId))
                         AvatarToPost.Enqueue(__0);
                 }
             }
@@ -115,13 +116,13 @@ namespace AvatarLoger
         }
         static bool CanPost(string id)
         {
-            if (config.CanPostFriendsAvatar)
-                return true;
-            else if (APIUser.CurrentUser.friendIDs.Contains(id))
+            if (!Config.CanPostSelfAvatar && APIUser.CurrentUser.id.Equals(id))
                 return false;
-            return true;
+            if (Config.CanPostFriendsAvatar)
+                return true;
+            return !APIUser.CurrentUser.friendIDs.Contains(id);
         }
-        IEnumerator DoCheck()
+        static void DoCheck()
         {
             for (; ; )
             {
@@ -132,7 +133,7 @@ namespace AvatarLoger
                         ApiAvatar avatar = AvatarToPost.Peek();
                         AvatarToPost.Dequeue();
                         DiscordEmbedBuilder discordEmbed = new DiscordEmbedBuilder();
-                        discordEmbed.WithAuthor(string.IsNullOrEmpty(config.BotName) ? "Loggy boi" : config.BotName, string.IsNullOrEmpty(config.AvatarURL) ? "https://i.imgur.com/No3R2yY.jpg" : config.AvatarURL, string.IsNullOrEmpty(config.AvatarURL) ? "https://i.imgur.com/No3R2yY.jpg" : config.AvatarURL);
+                        discordEmbed.WithAuthor(string.IsNullOrEmpty(Config.BotName) ? "Loggy boi" : Config.BotName, string.IsNullOrEmpty(Config.AvatarURL) ? "https://i.imgur.com/No3R2yY.jpg" : Config.AvatarURL, string.IsNullOrEmpty(Config.AvatarURL) ? "https://i.imgur.com/No3R2yY.jpg" : Config.AvatarURL);
                         discordEmbed.WithImageUrl(avatar.thumbnailImageUrl);
                         discordEmbed.WithColor(new DiscordColor(avatar.releaseStatus == "public" ? "#00FF00" : "#FF0000"));
                         discordEmbed.WithUrl($"https://vrchat.com/api/1/avatars/{avatar.id}?apiKey=JlE5Jldo5Jibnk5O5hTx6XVqsJu4WJ26");
@@ -149,23 +150,23 @@ namespace AvatarLoger
                         discordEmbed.AddField("Avatar Asset URL:", avatar.assetUrl);
                         discordEmbed.AddField("Avatar Image URL:", avatar.imageUrl);
                         discordEmbed.AddField("Avatar Thumbnail Image URL:", avatar.thumbnailImageUrl);
-                        discordEmbed.WithFooter("Made by KeafyIsHere", string.IsNullOrEmpty(config.AvatarURL) ? "https://i.imgur.com/No3R2yY.jpg" : config.AvatarURL);
-                        RestWebhookExecutePayload webhookpayload = new RestWebhookExecutePayload
+                        discordEmbed.WithFooter("Made by KeafyIsHere", string.IsNullOrEmpty(Config.AvatarURL) ? "https://i.imgur.com/No3R2yY.jpg" : Config.AvatarURL);
+                        RestWebhookExecutePayload restWebhookPayload = new RestWebhookExecutePayload
                         {
                             Content = "",
-                            Username = string.IsNullOrEmpty(config.BotName) ? "Loggy boi" : config.BotName,
-                            AvatarUrl = string.IsNullOrEmpty(config.AvatarURL) ? "https://i.imgur.com/No3R2yY.jpg" : config.AvatarURL,
+                            Username = string.IsNullOrEmpty(Config.BotName) ? "Loggy boi" : Config.BotName,
+                            AvatarUrl = string.IsNullOrEmpty(Config.AvatarURL) ? "https://i.imgur.com/No3R2yY.jpg" : Config.AvatarURL,
                             IsTTS = false,
-                            Embeds = new List<DiscordEmbed>() { discordEmbed.Build() }
+                            Embeds = new List<DiscordEmbed> { discordEmbed.Build() }
                         };
-                        new HttpClient().PostAsync(avatar.releaseStatus == "public" ? config.PublicWebhook : config.PrivateWebhook, new StringContent(JsonConvert.SerializeObject(webhookpayload), Encoding.UTF8, "application/json"));
+                        WebHookClient.PostAsync(avatar.releaseStatus == "public" ? Config.PublicWebhook : Config.PrivateWebhook, new StringContent(JsonConvert.SerializeObject(restWebhookPayload), Encoding.UTF8, "application/json"));
                     }
                 }
                 catch (Exception ex) 
                 {
-                    MelonLoader.MelonLogger.Error(ex);
+                    MelonLogger.Error(ex);
                 }
-                yield return new WaitForSeconds(1f);
+                Thread.Sleep(1000);
             }
         }
     }
