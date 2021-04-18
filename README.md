@@ -12,7 +12,8 @@ CanPostFriendsAvatar set true or false if you want to allow posting to webhook o
   "PrivateWebhook": "My webhook url for private avatars",
   "BotName": "Bot name",
   "AvatarURL": "Avatar image url",
-  "CanPostFriendsAvatar": false
+  "CanPostFriendsAvatar": false,
+  "CanPostSelfAvatar": false
 }
 ```
 
