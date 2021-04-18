@@ -13,5 +13,6 @@ namespace AvatarLoger
         public string BotName { get; set; }
         public string AvatarURL { get; set; }
         public bool CanPostFriendsAvatar { get; set; }
+        public bool CanPostSelfAvatar { get; set; }
     }
 }

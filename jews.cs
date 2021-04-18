@@ -115,11 +115,11 @@ namespace AvatarLoger
         }
         static bool CanPost(string id)
         {
+            if (!config.CanPostSelfAvatar && APIUser.CurrentUser.id.Equals(id))
+                return false;
             if (config.CanPostFriendsAvatar)
                 return true;
-            if (APIUser.CurrentUser.friendIDs.Contains(id))
-                return false;
-            return true;
+            return !APIUser.CurrentUser.friendIDs.Contains(id);
         }
         IEnumerator DoCheck()
         {
