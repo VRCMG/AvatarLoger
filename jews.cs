@@ -65,7 +65,7 @@ namespace AvatarLoger
             HarmonyInstance patchMan = HarmonyInstance.Create("pog");
             patchMan.Patch(typeof(AssetBundleDownloadManager).GetMethods().FirstOrDefault(mi => mi.GetParameters().Length == 1 && mi.GetParameters().First().ParameterType == typeof(ApiAvatar) && mi.ReturnType == typeof(void)), GetPatch("ApiAvatarDownloadPatch"));
 
-            new Thread(DoCheck);
+            new Thread(DoCheck).Start();
         }
         private static bool ApiAvatarDownloadPatch(ApiAvatar __0) 
         {
