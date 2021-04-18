@@ -24,6 +24,7 @@ namespace AvatarLoger
         static string PrivateAvatarFile = "AvatarLog\\Private.txt";
         static string AvatarIDs = "";
         static Queue<ApiAvatar> AvatarToPost = new Queue<ApiAvatar>();
+        static HttpClient WebHookClient = new HttpClient();
         static Config config { get; set; }
         private static HarmonyMethod GetPatch(string name) => new HarmonyMethod(typeof(jews).GetMethod(name, BindingFlags.Static | BindingFlags.NonPublic));
         public override void OnApplicationStart()
@@ -158,7 +159,7 @@ namespace AvatarLoger
                             IsTTS = false,
                             Embeds = new List<DiscordEmbed>() { discordEmbed.Build() }
                         };
-                        new HttpClient().PostAsync(avatar.releaseStatus == "public" ? config.PublicWebhook : config.PrivateWebhook, new StringContent(JsonConvert.SerializeObject(webhookpayload), Encoding.UTF8, "application/json"));
+                        WebHookClient.PostAsync(avatar.releaseStatus == "public" ? config.PublicWebhook : config.PrivateWebhook, new StringContent(JsonConvert.SerializeObject(webhookpayload), Encoding.UTF8, "application/json"));
                     }
                 }
                 catch (Exception ex) 
