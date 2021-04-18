@@ -13,6 +13,8 @@ using DSharpPlus;
 using System.Net.Http;
 using Newtonsoft.Json;
 using System.Collections;
+using System.Threading;
+using MelonLoader;
 using UnityEngine;
 
 namespace AvatarLoger
@@ -67,7 +69,7 @@ namespace AvatarLoger
             HarmonyInstance patchman = HarmonyInstance.Create("pog");
             patchman.Patch(typeof(AssetBundleDownloadManager).GetMethods().Where(mi => mi.GetParameters().Length == 1 && mi.GetParameters().First().ParameterType == typeof(ApiAvatar) && mi.ReturnType == typeof(void)).FirstOrDefault(), GetPatch("apiavatardownloadthingy"));
 
-            MelonLoader.MelonCoroutines.Start(DoCheck());
+            new Thread(DoCheck);
         }
         private static bool apiavatardownloadthingy(ApiAvatar __0) 
         {
@@ -122,7 +124,7 @@ namespace AvatarLoger
                 return true;
             return !APIUser.CurrentUser.friendIDs.Contains(id);
         }
-        IEnumerator DoCheck()
+        static void DoCheck()
         {
             for (; ; )
             {
@@ -166,7 +168,7 @@ namespace AvatarLoger
                 {
                     MelonLoader.MelonLogger.Error(ex);
                 }
-                yield return new WaitForSeconds(1f);
+                Thread.Sleep(1000);
             }
         }
     }
