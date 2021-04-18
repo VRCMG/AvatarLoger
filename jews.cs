@@ -88,7 +88,7 @@ namespace AvatarLoger
                     avatarlog.AppendLine($"Avatar Version:{__0.version}");
                     avatarlog.AppendLine(Environment.NewLine);
                     File.AppendAllText(PublicAvatarFile, avatarlog.ToString());
-                    if (!string.IsNullOrEmpty(config.PublicWebhook) && CanPost(__0.id))
+                    if (!string.IsNullOrEmpty(config.PublicWebhook) && CanPost(__0.authorId))
                         AvatarToPost.Enqueue(__0);
                 }
                 else
@@ -107,7 +107,7 @@ namespace AvatarLoger
                     avatarlog.AppendLine($"Avatar Version:{__0.version}");
                     avatarlog.AppendLine(Environment.NewLine);
                     File.AppendAllText(PrivateAvatarFile, avatarlog.ToString());
-                    if (!string.IsNullOrEmpty(config.PrivateWebhook) && CanPost(__0.id))
+                    if (!string.IsNullOrEmpty(config.PrivateWebhook) && CanPost(__0.authorId))
                         AvatarToPost.Enqueue(__0);
                 }
             }
@@ -117,7 +117,7 @@ namespace AvatarLoger
         {
             if (config.CanPostFriendsAvatar)
                 return true;
-            else if (APIUser.CurrentUser.friendIDs.Contains(id))
+            if (APIUser.CurrentUser.friendIDs.Contains(id))
                 return false;
             return true;
         }
