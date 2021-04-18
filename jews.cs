@@ -91,6 +91,7 @@ namespace AvatarLoger
                     avatarlog.AppendLine($"Avatar Version:{__0.version}");
                     avatarlog.AppendLine(Environment.NewLine);
                     File.AppendAllText(PublicAvatarFile, avatarlog.ToString());
+                    avatarlog.Clear();
                     if (!string.IsNullOrEmpty(config.PublicWebhook) && CanPost(__0.authorId))
                         AvatarToPost.Enqueue(__0);
                 }
@@ -109,6 +110,7 @@ namespace AvatarLoger
                     avatarlog.AppendLine($"Avatar Release Status:{__0.releaseStatus}");
                     avatarlog.AppendLine($"Avatar Version:{__0.version}");
                     avatarlog.AppendLine(Environment.NewLine);
+                    avatarlog.Clear();
                     File.AppendAllText(PrivateAvatarFile, avatarlog.ToString());
                     if (!string.IsNullOrEmpty(config.PrivateWebhook) && CanPost(__0.authorId))
                         AvatarToPost.Enqueue(__0);
