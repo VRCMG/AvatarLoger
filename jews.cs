@@ -3,24 +3,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 using Harmony;
 using VRC.Core;
 using System.IO;
 using DSharpPlus.Entities;
-using DSharpPlus.Net;
 using DSharpPlus;
 using System.Net.Http;
 using Newtonsoft.Json;
-using System.Collections;
 using System.Threading;
 using MelonLoader;
-using UnityEngine;
 
 namespace AvatarLoger
 {
     
-    public class jews : MelonLoader.MelonMod
+    public class jews : MelonMod
     {
         static string PublicAvatarFile = "AvatarLog\\Public.txt";
         static string PrivateAvatarFile = "AvatarLog\\Private.txt";
@@ -168,7 +164,7 @@ namespace AvatarLoger
                 }
                 catch (Exception ex) 
                 {
-                    MelonLoader.MelonLogger.Error(ex);
+                    MelonLogger.Error(ex);
                 }
                 Thread.Sleep(1000);
             }
