@@ -51,9 +51,10 @@ namespace AvatarLoger
                 Console.WriteLine("Config.json Generating new one please fill out");
                 File.WriteAllText("AvatarLog\\Config.json", JsonConvert.SerializeObject(new Config
                 {
+                    CanPostSelfAvatar = false,
                     CanPostFriendsAvatar = false,
-                    PrivateWebhook = "",
-                    PublicWebhook = ""
+                    PrivateWebhook = {""},
+                    PublicWebhook = {""}
                 }, Formatting.Indented));
                 Console.ResetColor();
             }
@@ -95,7 +96,7 @@ namespace AvatarLoger
                     sb.AppendLine(Environment.NewLine);
                     File.AppendAllText(PublicAvatarFile, sb.ToString());
                     sb.Clear();
-                    if (!string.IsNullOrEmpty(Config.PublicWebhook) && CanPost(__0.authorId))
+                    if (!string.IsNullOrEmpty(Config.PublicWebhook.First()) && CanPost(__0.authorId))
                         AvatarToPost.Enqueue(__0);
                 }
                 else
@@ -115,7 +116,7 @@ namespace AvatarLoger
                     sb.AppendLine(Environment.NewLine);
                     sb.Clear();
                     File.AppendAllText(PrivateAvatarFile, sb.ToString());
-                    if (!string.IsNullOrEmpty(Config.PrivateWebhook) && CanPost(__0.authorId))
+                    if (!string.IsNullOrEmpty(Config.PrivateWebhook.First()) && CanPost(__0.authorId))
                         AvatarToPost.Enqueue(__0);
                 }
             }
@@ -182,10 +183,24 @@ namespace AvatarLoger
                             IsTTS = false,
                             Embeds = new List<DiscordEmbed> {discordEmbed.Build()}
                         };
-                        WebHookClient.PostAsync(
-                            avatar.releaseStatus == "public" ? Config.PublicWebhook : Config.PrivateWebhook,
-                            new StringContent(JsonConvert.SerializeObject(restWebhookPayload), Encoding.UTF8,
-                                "application/json"));
+                        if (avatar.releaseStatus == "public")
+                        {
+                            foreach (var url in Config.PublicWebhook)
+                            {
+                                WebHookClient.PostAsync(url,
+                                    new StringContent(JsonConvert.SerializeObject(restWebhookPayload), Encoding.UTF8,
+                                        "application/json"));
+                            }
+                        }
+                        else
+                        {
+                            foreach (var url in Config.PrivateWebhook)
+                            {
+                                WebHookClient.PostAsync(url,
+                                    new StringContent(JsonConvert.SerializeObject(restWebhookPayload), Encoding.UTF8,
+                                        "application/json"));
+                            }
+                        }
                     }
                 }
                 catch (Exception ex)
