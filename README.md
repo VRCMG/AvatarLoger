@@ -8,8 +8,14 @@ CanPostFriendsAvatar set true or false if you want to allow posting to webhook o
 
 ```json
 {
-  "PublicWebhook": "My webhook url for public avatars",
-  "PrivateWebhook": "My webhook url for private avatars",
+  "PublicWebhook": [
+	"My first webhook url for public avatars",
+	"My second webhook url for public avatars"
+  ],
+  "PrivateWebhook": [
+	"My first webhook url for private avatars",
+	"My second webhook url for private avatars"
+  ],
   "BotName": "Bot name",
   "AvatarURL": "Avatar image url",
   "CanPostFriendsAvatar": false,
