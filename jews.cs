@@ -81,40 +81,40 @@ namespace AvatarLoger
                 if (__0.releaseStatus == "public")
                 {
                     _avatarIDs += __0.id;
-                    var avatarlog = new StringBuilder();
-                    avatarlog.AppendLine($"Avatar ID:{__0.id}");
-                    avatarlog.AppendLine($"Avatar Name:{__0.name}");
-                    avatarlog.AppendLine($"Avatar Description:{__0.description}");
-                    avatarlog.AppendLine($"Avatar Author ID:{__0.authorId}");
-                    avatarlog.AppendLine($"Avatar Author Name:{__0.authorName}");
-                    avatarlog.AppendLine($"Avatar Asset URL:{__0.assetUrl}");
-                    avatarlog.AppendLine($"Avatar Image URL:{__0.imageUrl}");
-                    avatarlog.AppendLine($"Avatar Thumbnail Image URL:{__0.thumbnailImageUrl}");
-                    avatarlog.AppendLine($"Avatar Release Status:{__0.releaseStatus}");
-                    avatarlog.AppendLine($"Avatar Version:{__0.version}");
-                    avatarlog.AppendLine(Environment.NewLine);
-                    File.AppendAllText(PublicAvatarFile, avatarlog.ToString());
-                    avatarlog.Clear();
+                    var sb = new StringBuilder();
+                    sb.AppendLine($"Avatar ID:{__0.id}");
+                    sb.AppendLine($"Avatar Name:{__0.name}");
+                    sb.AppendLine($"Avatar Description:{__0.description}");
+                    sb.AppendLine($"Avatar Author ID:{__0.authorId}");
+                    sb.AppendLine($"Avatar Author Name:{__0.authorName}");
+                    sb.AppendLine($"Avatar Asset URL:{__0.assetUrl}");
+                    sb.AppendLine($"Avatar Image URL:{__0.imageUrl}");
+                    sb.AppendLine($"Avatar Thumbnail Image URL:{__0.thumbnailImageUrl}");
+                    sb.AppendLine($"Avatar Release Status:{__0.releaseStatus}");
+                    sb.AppendLine($"Avatar Version:{__0.version}");
+                    sb.AppendLine(Environment.NewLine);
+                    File.AppendAllText(PublicAvatarFile, sb.ToString());
+                    sb.Clear();
                     if (!string.IsNullOrEmpty(Config.PublicWebhook) && CanPost(__0.authorId))
                         AvatarToPost.Enqueue(__0);
                 }
                 else
                 {
                     _avatarIDs += __0.id;
-                    var avatarlog = new StringBuilder();
-                    avatarlog.AppendLine($"Avatar ID:{__0.id}");
-                    avatarlog.AppendLine($"Avatar Name:{__0.name}");
-                    avatarlog.AppendLine($"Avatar Description:{__0.description}");
-                    avatarlog.AppendLine($"Avatar Author ID:{__0.authorId}");
-                    avatarlog.AppendLine($"Avatar Author Name:{__0.authorName}");
-                    avatarlog.AppendLine($"Avatar Asset URL:{__0.assetUrl}");
-                    avatarlog.AppendLine($"Avatar Image URL:{__0.imageUrl}");
-                    avatarlog.AppendLine($"Avatar Thumbnail Image URL:{__0.thumbnailImageUrl}");
-                    avatarlog.AppendLine($"Avatar Release Status:{__0.releaseStatus}");
-                    avatarlog.AppendLine($"Avatar Version:{__0.version}");
-                    avatarlog.AppendLine(Environment.NewLine);
-                    avatarlog.Clear();
-                    File.AppendAllText(PrivateAvatarFile, avatarlog.ToString());
+                    var sb = new StringBuilder();
+                    sb.AppendLine($"Avatar ID:{__0.id}");
+                    sb.AppendLine($"Avatar Name:{__0.name}");
+                    sb.AppendLine($"Avatar Description:{__0.description}");
+                    sb.AppendLine($"Avatar Author ID:{__0.authorId}");
+                    sb.AppendLine($"Avatar Author Name:{__0.authorName}");
+                    sb.AppendLine($"Avatar Asset URL:{__0.assetUrl}");
+                    sb.AppendLine($"Avatar Image URL:{__0.imageUrl}");
+                    sb.AppendLine($"Avatar Thumbnail Image URL:{__0.thumbnailImageUrl}");
+                    sb.AppendLine($"Avatar Release Status:{__0.releaseStatus}");
+                    sb.AppendLine($"Avatar Version:{__0.version}");
+                    sb.AppendLine(Environment.NewLine);
+                    sb.Clear();
+                    File.AppendAllText(PrivateAvatarFile, sb.ToString());
                     if (!string.IsNullOrEmpty(Config.PrivateWebhook) && CanPost(__0.authorId))
                         AvatarToPost.Enqueue(__0);
                 }
