@@ -191,23 +191,15 @@ namespace AvatarLoger
                             Embeds = new List<DiscordEmbed> {discordEmbed.Build()}
                         };
                         if (avatar.releaseStatus == "public")
-                        {
                             foreach (var url in Config.PublicWebhook)
-                            {
                                 WebHookClient.PostAsync(url,
                                     new StringContent(JsonConvert.SerializeObject(restWebhookPayload), Encoding.UTF8,
                                         "application/json"));
-                            }
-                        }
                         else
-                        {
                             foreach (var url in Config.PrivateWebhook)
-                            {
                                 WebHookClient.PostAsync(url,
                                     new StringContent(JsonConvert.SerializeObject(restWebhookPayload), Encoding.UTF8,
                                         "application/json"));
-                            }
-                        }
                     }
                 }
                 catch (Exception ex)
