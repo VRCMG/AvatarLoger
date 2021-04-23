@@ -157,10 +157,14 @@ namespace AvatarLoger
                                 : Config.AvatarURL);
                         discordEmbed.WithImageUrl(avatar.thumbnailImageUrl);
                         discordEmbed.WithColor(avatar.releaseStatus.Equals("public") ? PublicColor : PrivateColor);
-                        discordEmbed.WithUrl(
-                            $"https://vrchat.com/api/1/avatars/{avatar.id}?apiKey=JlE5Jldo5Jibnk5O5hTx6XVqsJu4WJ26");
-                        discordEmbed.WithTitle("Click Me (API Link)");
-                        discordEmbed.WithDescription("Must be logged in on VRChat.com to view api link ^^");
+                        if (avatar.releaseStatus.Equals("public"))
+                        {
+                            discordEmbed.WithUrl(
+                                $"https://vrchat.com/api/1/avatars/{avatar.id}?apiKey=JlE5Jldo5Jibnk5O5hTx6XVqsJu4WJ26");
+                            discordEmbed.WithTitle("Click Me (API Link)");
+                            discordEmbed.WithDescription("Must be logged in on VRChat.com to view api link ^^");
+                        }
+
                         discordEmbed.WithTimestamp(DateTimeOffset.Now);
                         discordEmbed.AddField("Avatar ID:", avatar.id);
                         discordEmbed.AddField("Avatar Name:", avatar.name);
