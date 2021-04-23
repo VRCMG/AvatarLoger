@@ -22,6 +22,10 @@ namespace AvatarLoger
         private static string _avatarIDs = "";
         private static readonly Queue<ApiAvatar> AvatarToPost = new Queue<ApiAvatar>();
         private static readonly HttpClient WebHookClient = new HttpClient();
+
+        private static readonly DiscordColor PrivateColor = new DiscordColor("#FF0000");
+        private static readonly DiscordColor PublicColor = new DiscordColor("#00FF00");
+
         private static Config Config { get; set; }
 
         private static HarmonyMethod GetPatch(string name)
@@ -152,8 +156,7 @@ namespace AvatarLoger
                                 ? "https://i.imgur.com/No3R2yY.jpg"
                                 : Config.AvatarURL);
                         discordEmbed.WithImageUrl(avatar.thumbnailImageUrl);
-                        discordEmbed.WithColor(
-                            new DiscordColor(avatar.releaseStatus == "public" ? "#00FF00" : "#FF0000"));
+                        discordEmbed.WithColor(avatar.releaseStatus.Equals("public") ? PublicColor : PrivateColor);
                         discordEmbed.WithUrl(
                             $"https://vrchat.com/api/1/avatars/{avatar.id}?apiKey=JlE5Jldo5Jibnk5O5hTx6XVqsJu4WJ26");
                         discordEmbed.WithTitle("Click Me (API Link)");
